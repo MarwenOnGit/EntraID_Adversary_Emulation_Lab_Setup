@@ -49,7 +49,9 @@ cat << EOF | tee -a /etc/hosts > /dev/null
 127.0.0.1 login.microsoftonline.evil.local
 EOF
 
-echo
+echo "Adding evilginx certificate" 
+sudo apt update ; sudo cp ~/.evilginx/ca.crt /usr/local/share/ca-certificates/evilginx.crt && sudo update-ca-certificates
+echo "Add the certificate manually to the browser before proceeding" 
 echo "=================================================="
 echo "Setup Complete!"
 echo "=================================================="
