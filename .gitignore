@@ -1,1 +1,22 @@
-Initial Access Tactics/evilginx-strat/evilginx2
+# IGNORE the Evilginx2 source code directory
+Initial Access Tactics/evilginx-strat/evilginx2/
+
+# BUT track everything else in the evilginx-strat folder
+!Initial Access Tactics/evilginx-strat/
+
+# Optional: add these common ignores for security
+*.key
+*.pem
+*.crt
+*.log
+sessions/
+data/
+certs/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
