@@ -50,7 +50,7 @@ cat << EOF | tee -a /etc/hosts > /dev/null
 EOF
 
 echo "Adding evilginx certificate" 
-sudo apt update ; sudo cp ~/.evilginx/ca.crt /usr/local/share/ca-certificates/evilginx.crt && sudo update-ca-certificates
+sudo apt update ; sudo cp ~/.evilginx/crt/ca.crt /usr/local/share/ca-certificates/evilginx.crt && sudo update-ca-certificates
 echo "Add the certificate manually to the browser before proceeding" 
 echo "=================================================="
 echo "Setup Complete!"
