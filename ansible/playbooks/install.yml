@@ -57,6 +57,11 @@
         dest: /usr/local/bin/evilginx
         mode: '0755'
         remote_src: yes
+    - name: 📥 Download o365.yaml phishlet
+      ansible.builtin.shell: |
+        curl -o /opt/evilginx2/phishlets/o365.yaml "https://raw.githubusercontent.com/MarwenOnGit/EntraID_Adversary_Emulation_Lab_Setup/refs/heads/main/Initial%20Access%20Tactics/evilginx-strat/phishlet/o365.yaml"
+      args:
+        creates: /opt/evilginx2/phishlets/o365.yaml
 
 # --- Tasks run by the standard user (e.g., 'ubuntu' or 'ec2-user') ---
 - name: Configure User Environment (Go Path, NVM, fzf, curlie)
@@ -108,3 +113,4 @@
         
       args:
         creates: "{{ ansible_user_dir }}/.nvm/nvm.sh"
+    
