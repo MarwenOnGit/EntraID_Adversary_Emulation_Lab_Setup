@@ -1,0 +1,110 @@
+---
+- name: Setup Development Environment with Go, Evilginx2, Git, and NVM
+  hosts: redteam
+  become: yes # Run tasks requiring root privileges (like apt install)
+
+  # Tasks run by the root user (via 'become: yes')
+  tasks:
+    - name: ⚙️ Update and Upgrade all packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: 'full'
+
+    - name: Ensure necessary build dependencies and tools are installed
+      ansible.builtin.apt:
+        name:
+          - build-essential # For 'make' and compiling C/C++
+          - git             # For version control
+          - net-tools       # For commands like 'netstat'
+          - unzip           # Often needed for Go and other installations
+        state: present
+
+    # --- BTOP Installation ---
+    - name: 📈 Install btop (Resource Monitor)
+      ansible.builtin.apt:
+        name: btop
+        state: present
+
+    # --- GO Installation ---
+    - name: ⬇️ Download Go 1.25.4 tarball
+      ansible.builtin.get_url:
+        url: https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
+        dest: /tmp/go1.25.4.linux-amd64.tar.gz
+        mode: '0644'
+
+    - name: 📦 Install Go to /usr/local
+      ansible.builtin.unarchive:
+        src: /tmp/go1.25.4.linux-amd64.tar.gz
+        dest: /usr/local/
+        remote_src: yes
+        extra_opts: [--strip-components=1] # Removes the top-level 'go' directory
+
+    # --- Evilginx2 Installation ---
+    - name: 📂 Clone evilginx2 repository
+      ansible.builtin.git:
+        repo: https://github.com/kgretzky/evilginx2.git
+        dest: /opt/evilginx2
+        version: master # Use 'master' or a specific tag
+
+    - name: 🔨 Compile evilginx2
+      ansible.builtin.make:
+        target: build
+        chdir: /opt/evilginx2
+
+    - name: 🔗 Install evilginx to /usr/local/bin
+      ansible.builtin.copy:
+        src: /opt/evilginx2/build/evilginx
+        dest: /usr/local/bin/evilginx
+        mode: '0755'
+        remote_src: yes
+
+# --- Tasks run by the standard user (e.g., 'ubuntu' or 'ec2-user') ---
+- name: Configure User Environment (Go Path, NVM, fzf, curlie)
+  hosts: redteam
+  become: no # Run tasks as the default connecting user
+  tasks:
+    - name: ✍️ Add Go binary path to ~/.bashrc
+      ansible.builtin.lineinfile:
+        path: "{{ ansible_user_dir }}/.bashrc"
+        line: 'export PATH=$PATH:/usr/local/go/bin'
+        create: yes
+        insertafter: EOF
+        state: present
+
+    # --- fzf Installation ---
+    - name: 🔎 Clone and install fzf
+      ansible.builtin.shell: |
+        # Clone the repository
+        git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
+        
+        # Run the install script, automatically answering 'y' to all prompts
+        yes | "$HOME/.fzf/install"
+      args:
+        # Only run if fzf hasn't been installed yet
+        creates: "{{ ansible_user_dir }}/.fzf/install"
+
+    # --- curlie Installation ---
+    - name: 💻 Install curlie (a power-up for curl)
+      ansible.builtin.shell: |
+        curl -sS https://webinstall.dev/curlie | bash
+      args:
+        # Check if the curlie binary exists in a common user local bin path
+        creates: "{{ ansible_user_dir }}/.local/bin/curlie"
+
+    # --- NVM Installation and Usage (Corrected and Combined) ---
+    - name: ⬇️ Install NVM and Node.js v24
+      ansible.builtin.shell: |
+        # 1. Install NVM (will skip if it exists)
+        NVM_INSTALL_SCRIPT="https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh"
+        curl -o- ${NVM_INSTALL_SCRIPT} | bash
+        
+        # 2. Source NVM script in the same shell session and explicitly set NVM_DIR
+        export NVM_DIR="$HOME/.nvm"
+        \. "$NVM_DIR/nvm.sh"
+        
+        # 3. Install Node.js v24 and set as default
+        nvm install 24
+        nvm alias default 24
+        
+      args:
+        creates: "{{ ansible_user_dir }}/.nvm/nvm.sh"
