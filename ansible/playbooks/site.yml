@@ -1,0 +1,28 @@
+---
+# site.yml - Main playbook orchestrating all red-team setup
+
+- name: Full Red Team Infrastructure Setup
+  hosts: redteam
+  gather_facts: yes
+
+  tasks:
+    - name: Display setup status
+      debug:
+        msg: "Starting red-team infrastructure setup for {{ inventory_hostname }}"
+
+    - name: Run base setup playbook
+      include: ./base-setup.yml
+      tags: base
+
+    - name: Run Evilginx2 deployment
+      include: ./deploy-evilginx.yml
+      tags: evilginx
+
+    - name: Final setup summary
+      debug:
+        msg: |
+          ✓ Red Team Infrastructure Setup Complete!
+          ✓ Instance: {{ inventory_hostname }}
+          ✓ IP: {{ ansible_default_ipv4.address }}
+          ✓ OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          ✓ Kernel: {{ ansible_kernel }}

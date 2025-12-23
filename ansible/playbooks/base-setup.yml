@@ -1,0 +1,72 @@
+---
+# base-setup.yml - Configure red-team instances with essential tools and hardening
+
+- name: Configure Red Team Instances
+  hosts: redteam
+  become: yes
+  gather_facts: yes
+
+  vars:
+    packages:
+      - git
+      - curl
+      - wget
+      - vim
+      - htop
+      - net-tools
+      - nmap
+      - python3
+      - python3-pip
+      - tmux
+      - jq
+
+  tasks:
+    - name: Update system packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install essential tools
+      yum:
+        name: "{{ packages }}"
+        state: present
+
+    - name: Enable EPEL repository
+      yum:
+        name: epel-release
+        state: present
+      ignore_errors: yes
+
+    - name: Create red-team user
+      user:
+        name: redteam
+        shell: /bin/bash
+        createhome: yes
+        groups: wheel
+        append: yes
+
+    - name: Configure SSH for redteam user
+      authorized_key:
+        user: redteam
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      ignore_errors: yes
+
+    - name: Configure sudo for redteam user (NOPASSWD)
+      lineinfile:
+        path: /etc/sudoers
+        line: 'redteam ALL=(ALL) NOPASSWD:ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+      ignore_errors: yes
+
+    - name: Create logs directory
+      file:
+        path: /var/log/redteam
+        state: directory
+        mode: '0755'
+        owner: redteam
+        group: redteam
+
+    - name: Display instance info
+      debug:
+        msg: "Instance {{ inventory_hostname }} configured successfully. IP: {{ ansible_default_ipv4.address }}"

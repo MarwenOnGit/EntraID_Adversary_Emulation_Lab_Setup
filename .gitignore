@@ -4,7 +4,30 @@ Initial Access Tactics/evilginx-strat/evilginx2/
 # BUT track everything else in the evilginx-strat folder
 !Initial Access Tactics/evilginx-strat/
 
-# Optional: add these common ignores for security
+# Terraform sensitive files
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
+terraform/terraform.tfvars
+terraform/terraform.tfvars.json
+terraform/crash.log
+terraform/crash.*.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+terraform/.terraformrc
+terraform/terraform.rc
+terraform/ansible.log
+
+# Ansible sensitive files
+ansible/inventory.ini
+ansible/vault.yml
+ansible/ansible.log
+ansible/.ansible/
+
+# AWS and Security
 *.key
 *.pem
 *.crt
@@ -12,6 +35,8 @@ Initial Access Tactics/evilginx-strat/evilginx2/
 sessions/
 data/
 certs/
+.aws/
+~/.aws
 
 # OS and editor files
 .DS_Store

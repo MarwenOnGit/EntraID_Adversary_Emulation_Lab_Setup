@@ -1,0 +1,85 @@
+---
+# deploy-evilginx.yml - Deploy Evilginx2 phishing framework
+
+- name: Deploy Evilginx2 Framework
+  hosts: redteam
+  become: yes
+
+  vars:
+    evilginx_repo: https://github.com/kgretzky/evilginx2.git
+    evilginx_dir: /opt/evilginx2
+    go_version: "1.21.0"
+    go_arch: "linux-amd64"
+
+  tasks:
+    - name: Install Go
+      block:
+        - name: Check if Go is installed
+          command: /usr/local/go/bin/go version
+          register: go_installed
+          ignore_errors: yes
+
+        - name: Download Go
+          get_url:
+            url: "https://go.dev/dl/go{{ go_version }}.{{ go_arch }}.tar.gz"
+            dest: /tmp/go.tar.gz
+          when: go_installed.rc != 0
+
+        - name: Extract Go
+          unarchive:
+            src: /tmp/go.tar.gz
+            dest: /usr/local
+            remote_src: yes
+          when: go_installed.rc != 0
+
+        - name: Create Go profile.d entry
+          copy:
+            content: |
+              export PATH=$PATH:/usr/local/go/bin
+            dest: /etc/profile.d/go.sh
+          when: go_installed.rc != 0
+
+    - name: Clone Evilginx2 repository
+      git:
+        repo: "{{ evilginx_repo }}"
+        dest: "{{ evilginx_dir }}"
+        version: master
+        force: yes
+
+    - name: Build Evilginx2
+      shell: |
+        source /etc/profile.d/go.sh
+        cd {{ evilginx_dir }}
+        /usr/local/go/bin/go mod tidy
+        /usr/local/go/bin/go build -o evilginx
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+      register: build_result
+      changed_when: "'built' in build_result.stderr or 'go build' in build_result.stderr"
+
+    - name: Copy evilginx to bin
+      copy:
+        src: "{{ evilginx_dir }}/evilginx"
+        dest: /usr/local/bin/evilginx
+        mode: '0755'
+        remote_src: yes
+
+    - name: Create Evilginx config directory
+      file:
+        path: /etc/evilginx
+        state: directory
+        mode: '0755'
+
+    - name: Verify Evilginx2 installation
+      command: /usr/local/bin/evilginx -h
+      register: evilginx_help
+      ignore_errors: yes
+
+    - name: Display Evilginx2 deployment status
+      debug:
+        msg: "✓ Evilginx2 deployed successfully on {{ inventory_hostname }}"
+      when: evilginx_help.rc == 0
+
+    - name: Show Evilginx2 location
+      debug:
+        msg: "Evilginx2 binary location: /usr/local/bin/evilginx"
