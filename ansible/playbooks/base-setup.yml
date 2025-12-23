@@ -21,18 +21,19 @@
 
   tasks:
     - name: Update system packages
-      yum:
-        name: '*'
-        state: latest
+      apt:
+        update_cache: yes
+        upgrade: dist
+        cache_valid_time: 3600
 
     - name: Install essential tools
-      yum:
+      apt:
         name: "{{ packages }}"
         state: present
 
     - name: Enable EPEL repository
-      yum:
-        name: epel-release
+      apt:
+        name: software-properties-common
         state: present
       ignore_errors: yes
 

@@ -33,7 +33,48 @@ MITRE ATT&CK techniques covered:
 - **Attacker Machine**: Local Ubuntu VM running a man-in-the-middle phishing proxy
 - **Victim Simulation**: Windows 10/11 machine or browser on separate profile (hybrid-joined optional)
 - **Target Identity Provider**: Microsoft Entra ID (free/trial tenant used for testing)
+- **AWS Infrastructure**: Terraform-provisioned EC2 instance in `eu-west-3` with Ansible-managed configuration
 - **All components isolated** – no external exposure
+
+## Infrastructure Setup (Terraform + Ansible)
+
+This repository includes Infrastructure-as-Code (IaC) automation to provision and configure a red-team EC2 instance.
+
+### Quick Start
+
+1. **Provision infrastructure with Terraform:**
+   ```bash
+   cd terraform
+   terraform init
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+2. **Generate Ansible inventory from Terraform outputs:**
+   ```bash
+   ./generate_ansible_inventory.sh
+   cd ../ansible
+   ```
+
+3. **Test SSH connectivity:**
+   ```bash
+   ansible -i inventory.ini redteam -m ping
+   ```
+
+4. **Install git and Go on the instance:**
+   ```bash
+   ansible-playbook -i inventory.ini playbooks/install-deps.yml
+   ```
+
+### Key Configuration Details
+
+- **Region**: `eu-west-3` (Ireland) — configurable via `terraform/terraform.tfvars`
+- **Instance Type**: `t3.small` — configurable via `terraform/variables.tf`
+- **SSH Key**: Repo-local key at `terraform/keys/id_rsa` (gitignored; create/import as needed)
+- **Remote User**: `ubuntu` (configurable per host in Ansible inventory)
+- **Ansible Connection**: SSH over port 22 with key-based authentication
+
+For detailed setup instructions, see `terraform/README.md` and `ansible/README.md`.
 
 ## Emulation Phases Demonstrated
 
