@@ -45,7 +45,6 @@
           file:
             path: "{{ go_install_dir }}/go"
             state: absent
-            recurse: yes
 
         - name: Extract Go to /usr/local
           unarchive:

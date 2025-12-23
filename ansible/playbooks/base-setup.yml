@@ -42,7 +42,7 @@
         name: redteam
         shell: /bin/bash
         createhome: yes
-        groups: wheel
+        groups: sudo
         append: yes
 
     - name: Configure SSH for redteam user
