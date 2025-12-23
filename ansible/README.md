@@ -49,6 +49,14 @@ redteam-01 ansible_host=$INSTANCE_IP ansible_user=ec2-user
 EOF
 ```
 
+Alternatively, you can auto-generate the inventory from Terraform outputs (recommended when running Terraform from this repo):
+
+```bash
+# Run from the `terraform/` directory in the repo root
+./generate_ansible_inventory.sh
+```
+This writes `ansible/inventory.ini` when Terraform outputs are present.
+
 ### 3. Test SSH Connectivity
 
 ```bash

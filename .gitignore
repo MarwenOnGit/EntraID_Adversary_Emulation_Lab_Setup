@@ -20,6 +20,8 @@ terraform/*_override.tf.json
 terraform/.terraformrc
 terraform/terraform.rc
 terraform/ansible.log
+terraform/keys/*
+!terraform/keys/README.md
 
 # Ansible sensitive files
 ansible/inventory.ini

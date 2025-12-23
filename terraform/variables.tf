@@ -1,7 +1,7 @@
 variable "aws_region" {
   description = "AWS region to create resources in"
   type        = string
-  default     = "us-east-1"
+  default     = "eu-west-3"
 }
 
 variable "ami_id" {
@@ -13,11 +13,23 @@ variable "ami_id" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 
 variable "key_name" {
   description = "Optional: SSH key pair name to attach to the instance"
   type        = string
   default     = ""
+}
+
+variable "ssh_private_key_path" {
+  description = "Path to the SSH private key on the control machine that will be used by Ansible"
+  type        = string
+  default     = "terraform/keys/id_rsa"
+}
+
+variable "ssh_user" {
+  description = "Default SSH user for the instance (ubuntu for Ubuntu AMIs, ec2-user for Amazon Linux)"
+  type        = string
+  default     = "ubuntu"
 }
