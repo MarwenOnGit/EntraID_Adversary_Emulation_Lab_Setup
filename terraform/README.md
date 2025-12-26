@@ -1,102 +1,66 @@
-# Terraform Setup – Red Team EC2 Infrastructure
+# Terraform – Red Team EC2 in eu-west-3
 
-This directory contains Terraform configuration to provision and manage a single EC2 instance for red-team lab operations in AWS `eu-west-3`.
+Automatically generates SSH keys, creates AWS key pair, and provisions Ubuntu 22.04 EC2 instance.
 
 ## Files
 
-- **`provider.tf`** — AWS provider configuration (region, version constraints)
-- **`variables.tf`** — Input variables (aws_region, instance_type, ami_id, key_name, ssh_private_key_path, ssh_user)
-- **`main.tf`** — EC2 instance and security group resources
-- **`iam.tf`** — IAM role and instance profile for EC2 Systems Manager (SSM)
-- **`outputs.tf`** — Terraform outputs (instance IPs, SSH info, Ansible inventory)
-- **`terraform.tfvars.example`** — Example variable overrides
-- **`generate_ansible_inventory.sh`** — Script to auto-generate `../ansible/inventory.ini` from Terraform outputs
-- **`keys/`** — Directory for repo-local SSH keys (gitignored; see `keys/README.md`)
+- **`provider.tf`** — AWS, TLS, local providers
+- **`variables.tf`** — aws_region (eu-west-3), instance_type (t3.small), ami_id, ssh paths
+- **`main.tf`** — TLS key generation, AWS key pair, EC2 + security group
+- **`iam.tf`** — IAM role and instance profile for SSM
+- **`outputs.tf`** — instance_id, public_ip, private_ip, ssh_command, ansible_inventory
+- **`generate_ansible_inventory.sh`** — Auto-generates ../ansible/inventory.ini
+- **`keys/`** — Terraform saves id_rsa (0600) and id_rsa.pub here (gitignored)
 
 ## Quick Start
 
-1. **Ensure AWS CLI is configured:**
-   ```bash
-   aws sts get-caller-identity
-   ```
-
-2. **Copy and customize variables (optional):**
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   # Edit terraform.tfvars to override defaults if needed
-   ```
-
-3. **Initialize Terraform:**
-   ```bash
-   terraform init
-   ```
-
-4. **Plan and review:**
-   ```bash
-   terraform plan
-   ```
-
-5. **Apply to provision:**
-   ```bash
-   terraform apply -auto-approve
-   ```
-
-## SSH Key Setup
-
-The configuration uses a repo-local SSH key path: `terraform/keys/id_rsa`
-
-**Option 1: Import existing EC2 key pair**
 ```bash
-cp ~/Downloads/your-key.pem ./keys/id_rsa
-chmod 600 ./keys/id_rsa
-echo 'key_name = "your-key"' >> terraform.tfvars
+aws sts get-caller-identity  # Verify AWS CLI
+terraform init
+terraform apply -auto-approve
+./generate_ansible_inventory.sh  # Creates ../ansible/inventory.ini
+ls -l keys/id_rsa  # Verify private key (should be 0600)
 ```
 
-**Option 2: Create via Terraform** (uncomment in `main.tf`)
-- Terraform will generate a new RSA key and save the private key to `keys/id_rsa`
+## How It Works
 
-**Option 3: Use AWS Systems Manager (SSM)**
-- If IAM role is configured, use `aws ssm start-session --target <instance-id> --region eu-west-3`
+**main.tf** does the heavy lifting:
+1. `tls_private_key` — generates 4096-bit RSA key pair
+2. `aws_key_pair` — imports public key into AWS
+3. `local_sensitive_file` — saves private key to `keys/id_rsa` (0600 perms)
+4. `local_file` — saves public key to `keys/id_rsa.pub`
+5. `aws_instance` — creates EC2 with key pair attached
 
-## Terraform Workflow
+## Manual SSH
+
+```bash
+ssh -i terraform/keys/id_rsa ubuntu@<public_ip>
+```
+
+## Common Commands
 
 ```bash
 terraform output                    # Show all outputs
-terraform output -raw public_ip     # Show just the public IP
-terraform output -json              # JSON format
-
-./generate_ansible_inventory.sh     # Auto-generate Ansible inventory
-
-terraform destroy                   # Remove resources
+terraform output -raw public_ip     # Get instance IP
+terraform destroy -auto-approve     # Tear down
 ```
 
-## Configuration Details
+## Defaults
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `aws_region` | `eu-west-3` | AWS region (Ireland) |
-| `instance_type` | `t3.small` | EC2 instance type |
-| `ami_id` | Ubuntu 22.04 LTS | Amazon Machine Image |
-| `key_name` | *(required)* | EC2 key pair name |
-| `ssh_private_key_path` | `terraform/keys/id_rsa` | Private key for Ansible |
-| `ssh_user` | `ubuntu` | SSH username |
+| Variable | Default |
+|----------|---------|
+| `aws_region` | eu-west-3 |
+| `instance_type` | t3.small |
+| `ssh_user` | ubuntu |
 
-## AWS Credentials
+## Troubleshooting
 
-Terraform uses standard AWS credential resolution:
-1. Environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
-2. AWS profile: `export AWS_PROFILE=profile-name`
-3. Shared credentials file: `~/.aws/credentials`
+| Issue | Fix |
+|-------|-----|
+| AWS credentials missing | Set AWS_PROFILE or AWS_ACCESS_KEY_ID/SECRET_ACCESS_KEY |
+| SSH key permission denied | Verify keys/id_rsa exists and has 0600 perms |
+| Instance fails to launch | Check security group allows SSH (port 22) |
 
-## Next Steps
+## Next
 
-1. Run `terraform apply` to provision the instance
-2. Use `./generate_ansible_inventory.sh` to create Ansible inventory
-3. Run Ansible playbooks from `../ansible/` directory
-4. See `../ansible/README.md` for playbook usage
-
-## References
-
-- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [AWS EC2 Documentation](https://docs.aws.amazon.com/ec2/)
-- [Terraform State Management](https://www.terraform.io/language/state)
+Run `./generate_ansible_inventory.sh` then execute Ansible playbooks from `../ansible/`.
