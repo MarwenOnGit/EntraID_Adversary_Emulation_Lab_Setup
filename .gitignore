@@ -21,6 +21,7 @@ terraform/.terraformrc
 terraform/terraform.rc
 terraform/ansible.log
 terraform/keys/*
+terraform/.tfsate.lock.info
 !terraform/keys/README.md
 
 # Ansible sensitive files
