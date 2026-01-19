@@ -33,3 +33,8 @@ variable "ssh_user" {
   type        = string
   default     = "ubuntu"
 }
+
+variable "eip" {
+  description = "Existing Elastic IP address to associate with the instance"
+  type        = string
+}

@@ -59,6 +59,7 @@ resource "aws_instance" "redteam" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
   vpc_security_group_ids = [aws_security_group.redteam.id]
   key_name               = aws_key_pair.redteam.key_name
+  associate_public_ip_address = false
 
   tags = {
     Name      = "redteam-${terraform.workspace}"
@@ -66,4 +67,16 @@ resource "aws_instance" "redteam" {
   }
 
   depends_on = [local_sensitive_file.private_key]
+}
+
+data "aws_eip" "existing" {
+  filter {
+    name   = "public-ip"
+    values = [var.eip]
+  }
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.redteam.id
+  allocation_id = data.aws_eip.existing.id
 }

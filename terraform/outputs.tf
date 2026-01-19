@@ -5,7 +5,7 @@ output "instance_id" {
 
 output "public_ip" {
   description = "Public IP address"
-  value       = aws_instance.redteam.public_ip
+  value       = data.aws_eip.existing.public_ip
 }
 
 output "private_ip" {
@@ -25,10 +25,10 @@ output "ssh_key_path" {
 
 output "ssh_command" {
   description = "Suggested SSH command to connect to the instance"
-  value       = "ssh -i ${var.ssh_private_key_path} ${var.ssh_user}@${aws_instance.redteam.public_ip}"
+  value       = "ssh -i ${var.ssh_private_key_path} ${var.ssh_user}@${data.aws_eip.existing.public_ip}"
 }
 
 output "ansible_inventory" {
   description = "One-line Ansible inventory entry (copy-paste)"
-  value       = "redteam-01 ansible_host=${aws_instance.redteam.public_ip} ansible_user=${var.ssh_user} ansible_ssh_private_key_file=${var.ssh_private_key_path}"
+  value       = "redteam-01 ansible_host=${data.aws_eip.existing.public_ip} ansible_user=${var.ssh_user} ansible_ssh_private_key_file=${var.ssh_private_key_path}"
 }
