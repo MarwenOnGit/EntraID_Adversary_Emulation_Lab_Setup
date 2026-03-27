@@ -5,30 +5,30 @@ Initial Access Tactics/evilginx-strat/evilginx2/
 !Initial Access Tactics/evilginx-strat/
 
 # Terraform sensitive files
-terraform/.terraform/
-terraform/.terraform.lock.hcl
-terraform/terraform.tfstate
-terraform/terraform.tfstate.*
-terraform/terraform.tfvars
-terraform/terraform.tfvars.json
-terraform/crash.log
-terraform/crash.*.log
-terraform/override.tf
-terraform/override.tf.json
-terraform/*_override.tf
-terraform/*_override.tf.json
-terraform/.terraformrc
-terraform/terraform.rc
-terraform/ansible.log
-terraform/keys/*
-terraform/.tfsate.lock.info
+terraform_evilginx/.terraform/
+terraform_evilginx/.terraform.lock.hcl
+terraform_evilginx/terraform.tfstate
+terraform_evilginx/terraform.tfstate.*
+terraform_evilginx/terraform.tfvars
+terraform_evilginx/terraform.tfvars.json
+terraform_evilginx/crash.log
+terraform_evilginx/crash.*.log
+terraform_evilginx/override.tf
+terraform_evilginx/override.tf.json
+terraform_evilginx/*_override.tf
+terraform_evilginx/*_override.tf.json
+terraform_evilginx/.terraformrc
+terraform_evilginx/terraform.rc
+terraform_evilginx/ansible.log
+terraform_evilginx/keys/*
+terraform_evilginx/.tfsate.lock.info
 !terraform/keys/README.md
 
 # Ansible sensitive files
-ansible/inventory.ini
-ansible/vault.yml
-ansible/ansible.log
-ansible/.ansible/
+ansible_evilginx/inventory.ini
+ansible_evilginx/vault.yml
+ansible_evilginx/ansible.log
+ansible_evilginx/.ansible/
 
 # AWS and Security
 *.key
